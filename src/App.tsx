@@ -212,7 +212,6 @@ const GlobalSuggestionInput = ({ value, setValue, placeholder, list, icon: Icon 
 export default function App() {
   const [activeTab, setActiveTab] = useState('simplifikasi');
   const [tableView, setTableView] = useState('scored'); 
-  const [showDetails, setShowDetails] = useState(false); 
 
   const [scoreFilters, setScoreFilters] = useState(['all']); 
   const [evaluatorFilters, setEvaluatorFilters] = useState(['all']); 
@@ -860,12 +859,6 @@ export default function App() {
                   </div>
 
                   <button 
-                    onClick={() => setShowDetails(!showDetails)} 
-                    className={`text-[11px] font-bold flex items-center gap-2 uppercase tracking-widest transition-all px-4 py-2 rounded-xl ${showDetails ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
-                  >
-                    {showDetails ? <EyeOff size={14}/> : <Eye size={14}/>} {showDetails ? 'Compact View' : 'Detail View'}
-                  </button>
-                  <button 
                     onClick={handleExportTable} 
                     className="text-[11px] font-bold text-white bg-slate-800 hover:bg-slate-700 flex items-center gap-2 uppercase tracking-widest transition-all px-4 py-2 rounded-xl shadow-sm"
                   >
@@ -882,21 +875,7 @@ export default function App() {
                       <th className="px-6 py-4 min-w-[250px] w-1/3">Training Topic</th>
                       <th className="px-6 py-4 whitespace-nowrap">Group SBU</th>
                       <th className="px-6 py-4 whitespace-nowrap">HRBP Name</th>
-                      <th className="px-4 py-4 whitespace-nowrap text-center text-blue-800 bg-blue-50/50" title="Evaluated by HRBP?">HRBP</th>
-                      <th className="px-4 py-4 whitespace-nowrap text-center text-blue-800 bg-blue-50/50" title="Evaluated by SME?">SME</th>
-                      <th className="px-4 py-4 whitespace-nowrap text-center text-blue-800 bg-blue-50/50 border-r border-slate-200" title="Evaluated by Academy?">ACD</th>
                       <th className="px-6 py-4 whitespace-nowrap text-center bg-slate-200/30">Score</th>
-                      {showDetails && (
-                        <>
-                          <th className="px-4 py-4 whitespace-nowrap text-center border-l border-slate-200">Theory</th>
-                          <th className="px-4 py-4 whitespace-nowrap text-center">Accuracy</th>
-                          <th className="px-4 py-4 whitespace-nowrap text-center">Relevance</th>
-                          <th className="px-4 py-4 whitespace-nowrap text-center">Practical</th>
-                          <th className="px-4 py-4 whitespace-nowrap text-center">Visual</th>
-                          <th className="px-4 py-4 whitespace-nowrap text-center">Evaluation</th>
-                          <th className="px-4 py-4 whitespace-nowrap text-center">Q&A</th>
-                        </>
-                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -921,16 +900,6 @@ export default function App() {
                           </td>
                           <td className="px-6 py-4 text-xs font-semibold text-slate-600 whitespace-nowrap">{row['Group SBU/SFU'] || '-'}</td>
                           <td className="px-6 py-4 text-xs font-semibold text-slate-600 whitespace-nowrap">{getHrbp(row) || '-'}</td>
-                          <td className="px-4 py-4 text-center">
-                             {row._hasHRBP ? <CheckCircle2 size={16} className="text-blue-600 mx-auto" /> : <span className="text-slate-300">-</span>}
-                          </td>
-                          <td className="px-4 py-4 text-center">
-                             {row._hasSME ? <CheckCircle2 size={16} className="text-blue-600 mx-auto" /> : <span className="text-slate-300">-</span>}
-                          </td>
-                          <td className="px-4 py-4 text-center border-r border-slate-100">
-                             {row._hasAcademy ? <CheckCircle2 size={16} className="text-blue-600 mx-auto" /> : <span className="text-slate-300">-</span>}
-                          </td>
-
                           <td className="px-6 py-4 text-center">
                              {row._TotalScore !== null ? (
                                <span className={`inline-flex items-center justify-center px-3.5 py-1.5 rounded-full text-xs font-black shadow-sm border ${row._TotalScore >= 8 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-500 text-white border-red-600'}`}>
@@ -942,23 +911,12 @@ export default function App() {
                                </span>
                              )}
                           </td>
-                          {showDetails && (
-                            <>
-                              <td className={"px-4 py-4 text-xs text-center font-bold border-l border-slate-100 " + getSubScoreStyle(row._Theory)}>{row._Theory || '-'}</td>
-                              <td className={"px-4 py-4 text-xs text-center font-bold " + getSubScoreStyle(row._Accuracy)}>{row._Accuracy || '-'}</td>
-                              <td className={"px-4 py-4 text-xs text-center font-bold " + getSubScoreStyle(row._Relevance)}>{row._Relevance || '-'}</td>
-                              <td className={"px-4 py-4 text-xs text-center font-bold " + getSubScoreStyle(row._Practical)}>{row._Practical || '-'}</td>
-                              <td className={"px-4 py-4 text-xs text-center font-bold " + getSubScoreStyle(row._Visual)}>{row._Visual || '-'}</td>
-                              <td className={"px-4 py-4 text-xs text-center font-bold " + getSubScoreStyle(row._Eval)}>{row._Eval || '-'}</td>
-                              <td className={"px-4 py-4 text-xs text-center font-bold " + getSubScoreStyle(row._QA)}>{row._QA || '-'}</td>
-                            </>
-                          )}
                         </tr>
                       )
                     })}
                     {tableData.length === 0 && (
                       <tr>
-                        <td colSpan={showDetails ? 15 : 8} className="px-6 py-20 text-center text-slate-400 bg-slate-50/50">
+                        <td colSpan={5} className="px-6 py-20 text-center text-slate-400 bg-slate-50/50">
                           <div className="flex flex-col items-center justify-center gap-4">
                             <div className="bg-white p-4 rounded-full shadow-sm border border-slate-100">
                                <AlertCircle size={32} className="text-slate-300" />
