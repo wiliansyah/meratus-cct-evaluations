@@ -235,7 +235,6 @@ export default function App() {
   const { value: sbuFilter, setValue: setSbuFilter } = useFilterDropdown("");
   const { value: hrbpFilter, setValue: setHrbpFilter } = useFilterDropdown("");
   
-  // NEW STATE: Filter untuk 100% SBU
   const [completeSbuOnly, setCompleteSbuOnly] = useState(false);
 
   useEffect(() => {
@@ -305,7 +304,6 @@ export default function App() {
     });
   }, [rawData]);
 
-  // NEW MEMO: Menghitung status completeness secara murni dari data sebelum filter aktif
   const sbuStats = useMemo(() => {
     const stats = {};
     parsedData.forEach(d => {
@@ -326,7 +324,6 @@ export default function App() {
   const globallyFilteredData = useMemo(() => {
     let data = parsedData;
     
-    // Terapkan SBU Complete Filter 
     if (completeSbuOnly) {
       data = data.filter(d => {
         const sbu = d['Group SBU/SFU'] || 'Unknown';
@@ -406,9 +403,18 @@ export default function App() {
     };
   }, [globallyFilteredData]);
 
+  // NEW LOGIC: Target Specific SBU/SFU Units instead of Top 5
   const activeSBUs = metrics.sbuSummary.filter(s => s.valid > 0);
-  const top5SBUs = activeSBUs.slice(0, 5);
-  const otherSBUs = activeSBUs.slice(5);
+  const TARGET_SBUS = ['Liner Commercial', 'IT', 'Liner Trade', 'Trucking', 'Logistics'];
+  
+  const highlightedSBUs = activeSBUs.filter(s => 
+    TARGET_SBUS.some(target => (s.name || '').toLowerCase().includes(target.toLowerCase()))
+  );
+  
+  const otherSBUs = activeSBUs.filter(s => 
+    !TARGET_SBUS.some(target => (s.name || '').toLowerCase().includes(target.toLowerCase()))
+  );
+
   const zeroSBUs = metrics.sbuSummary.filter(s => s.valid === 0 && s.total > 0);
 
   const tableData = useMemo(() => {
@@ -599,7 +605,6 @@ export default function App() {
               <GlobalSuggestionInput value={sbuFilter} setValue={setSbuFilter} placeholder="Filter SBU/SFU..." list={suggestions.sbus} icon={Building2} />
               <GlobalSuggestionInput value={hrbpFilter} setValue={setHrbpFilter} placeholder="Filter HRBP..." list={suggestions.hrbps} icon={Users} />
               
-              {/* NEW TOGGLE BUTTON: SBU/SFU 100% COMPLETE */}
               <button 
                 onClick={() => setCompleteSbuOnly(!completeSbuOnly)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors border ${completeSbuOnly ? 'bg-emerald-100 text-emerald-700 border-emerald-200 shadow-inner' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 shadow-sm'}`}
@@ -751,8 +756,8 @@ export default function App() {
                   
                   <div className="p-3 flex-1 flex flex-col bg-slate-50/30">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-3">
-                      {top5SBUs.map((s, i) => (
-                        <div key={`top-${i}`} className={`bg-white border rounded-lg p-2.5 pl-3 flex flex-col relative overflow-hidden shadow-sm h-[60px] justify-between ${s.avg < 8 ? 'border-red-200' : 'border-slate-200'}`}>
+                      {highlightedSBUs.map((s, i) => (
+                        <div key={`highlight-${i}`} className={`bg-white border rounded-lg p-2.5 pl-3 flex flex-col relative overflow-hidden shadow-sm h-[60px] justify-between ${s.avg < 8 ? 'border-red-200' : 'border-slate-200'}`}>
                           <div className={`absolute top-0 left-0 w-1 h-full ${s.avg >= 8 ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
                           <div className="flex justify-between items-start w-full gap-1">
                             <span className="text-[9px] font-bold text-slate-600 uppercase leading-none truncate flex-1" title={s.name}>{s.name}</span>
@@ -1065,6 +1070,7 @@ export default function App() {
         @media print {
            @page { size: A4 landscape; margin: 10mm; }
            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
+        }
       `}} />
     </div>
   );
