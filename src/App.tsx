@@ -1065,7 +1065,6 @@ export default function App() {
         @media print {
            @page { size: A4 landscape; margin: 10mm; }
            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
-        }
       `}} />
     </div>
   );
